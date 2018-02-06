@@ -17,11 +17,13 @@ struct timespec {
 };
 #endif
 
-#define SEM_FAILED     (-1)
+#define SEM_FAILED     (NULL)
 #define SEM_VALUE_MAX  UINT_MAX /* Maximum value allowed for a semaphore */
 #define SEM_NSEMS_MAX  UINT_MAX /* Maximum number of semaphores per process */
 
 /* TODO: Move to common header posix_common.h */
+#define PATH_MAX       (64)
+#define NAME_MAX       (64)
 #define O_CREAT        (1 << 0)
 #define O_EXCL         (1 << 1)
 
@@ -46,7 +48,7 @@ int sem_destroy(sem_t *sem);
  *
  * See IEEE 1003.1
  */
-int sem_getvalue(sem_t *sem, int *sval);
+int sem_getvalue(sem_t *restrict sem, int *restrict sval);
 
 /**
  * @brief POSIX semaphores API
@@ -74,7 +76,8 @@ int sem_trywait(sem_t *sem);
  *
  * See IEEE 1003.1
  */
-int sem_timedwait(sem_t *sem, const struct timespec *tv);
+int sem_timedwait(sem_t *restrict sem,
+		  const struct timespec *restrict abs_timeout);
 
 /**
  * @brief POSIX semaphores API

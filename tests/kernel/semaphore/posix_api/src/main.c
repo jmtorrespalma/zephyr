@@ -18,8 +18,28 @@ K_SEM_DEFINE(old_sem, 0, NTH);
 static sem_t semaphore;
 static bool finished; /* Assume false */
 static int shared_counter;
+static int named_counter;
 static int tot_counter[NTH];
 static int th_status[NTH];
+const char sema_name[] = "/shared";
+
+
+void test_named_sem(int id)
+{
+	sem_t *ptr;
+
+	ptr = sem_open(sema_name, O_CREAT, 0, 1);
+
+	sem_wait(ptr);
+	++named_counter;
+	sem_post(ptr);
+
+
+	if (id == 0)
+		sem_unlink(sema_name);
+	else
+		sem_close(ptr);
+}
 
 void *thread_code(void *vid)
 {
@@ -50,6 +70,10 @@ void *thread_code(void *vid)
 
 	} while (!finished);
 
+	/* Named semaphore test */
+	test_named_sem(id);
+
+
 	printk("Thread %d finished\n", id);
 	th_status[id] = 1;
 
@@ -79,7 +103,7 @@ int check_result(void)
 		printk("Thread %d counter: %d\n", i, tot_counter[i]);
 	}
 
-	return (sum == shared_counter) && (sum == CTR_LIM);
+	return (sum == shared_counter) && (sum == CTR_LIM) && (named_counter == NTH);
 }
 
 void main(void)
